@@ -16,6 +16,7 @@ using DaggerfallWorkshop.Game.Formulas;
 using DaggerfallConnect;
 using DaggerfallWorkshop.Game.Questing;
 using DaggerfallWorkshop.Game.Utility;
+using Game.Characters;
 
 namespace DaggerfallWorkshop.Game
 {
@@ -35,7 +36,7 @@ namespace DaggerfallWorkshop.Game
         MobileUnit mobile;
         DaggerfallEntityBehaviour entityBehaviour;
         QuestResourceBehaviour questBehaviour;
-        EnemyMotor motor;
+        CharacterMotor motor;
         EnemyEntity enemyEntity;
         bool targetInSight;
         bool playerInSight;
@@ -217,7 +218,7 @@ namespace DaggerfallWorkshop.Game
             mobile = GetComponent<DaggerfallCharacter>().MobileUnit;
             entityBehaviour = GetComponent<DaggerfallEntityBehaviour>();
             enemyEntity = entityBehaviour.Entity as EnemyEntity;
-            motor = GetComponent<EnemyMotor>();
+            motor = GetComponent<CharacterMotor>();
             questBehaviour = GetComponent<QuestResourceBehaviour>();
             player = GameManager.Instance.PlayerEntityBehaviour;
 

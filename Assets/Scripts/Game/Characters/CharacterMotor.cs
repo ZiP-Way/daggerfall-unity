@@ -5,18 +5,20 @@
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
 // Contributors:    Allofich
-// 
+//
 // Notes:
 //
 
-using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+using DaggerfallWorkshop;
+using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.MagicAndEffects;
-using System.Collections.Generic;
 using DaggerfallWorkshop.Utility;
-using System.Linq;
+using UnityEngine;
 
-namespace DaggerfallWorkshop.Game
+namespace Game.Characters
 {
     /// <summary>
     /// Enemy motor and AI combat decision-making logic.
@@ -26,9 +28,8 @@ namespace DaggerfallWorkshop.Game
     [RequireComponent(typeof(EnemyBlood))]
     [RequireComponent(typeof(EnemySounds))]
     [RequireComponent(typeof(CharacterController))]
-    public class EnemyMotor : MonoBehaviour
+    public abstract class CharacterMotor : MonoBehaviour
     {
-
         #region Member Variables
 
         public float OpenDoorDistance = 2f;         // Maximum distance to open door
@@ -71,7 +72,9 @@ namespace DaggerfallWorkshop.Game
         bool flyerFalls;
         float originalHeight;
 
-        EnemySenses senses;
+        protected EnemySenses Senses;
+        protected EnemyAttack Attack;
+
         Vector3 destination;
         Vector3 detourDestination;
         CharacterController controller;
@@ -80,7 +83,6 @@ namespace DaggerfallWorkshop.Game
         DaggerfallEntityBehaviour entityBehaviour;
         EnemyBlood entityBlood;
         EntityEffectManager entityEffectManager;
-        EnemyAttack attack;
         EnemyEntity entity;
         #endregion
 
@@ -115,7 +117,7 @@ namespace DaggerfallWorkshop.Game
 
         void Start()
         {
-            senses = GetComponent<EnemySenses>();
+            Senses = GetComponent<EnemySenses>();
             controller = GetComponent<CharacterController>();
             mobile = GetComponentInChildren<MobileUnit>();
             myCollider = gameObject.GetComponent<Collider>();
@@ -126,11 +128,11 @@ namespace DaggerfallWorkshop.Game
             entityBlood = GetComponent<EnemyBlood>();
             entityEffectManager = GetComponent<EntityEffectManager>();
             entity = entityBehaviour.Entity as EnemyEntity;
-            attack = GetComponent<EnemyAttack>();
+            Attack = GetComponent<EnemyAttack>();
 
             // Only need to check for ability to shoot bow once.
             // A mobile has a bow attack if:
-            //   - it has RangedAttack1 and does not cast magic (ex: Mage, Healer, ...), or 
+            //   - it has RangedAttack1 and does not cast magic (ex: Mage, Healer, ...), or
             //   - it has both RangedAttack1 and RangedAttack2 (ex: Nightblade)
             // If a mobile only has RangedAttack1 and casts magic, then its ranged attack is only shooting spells, not shooting a bow
             hasBowAttack =
@@ -177,6 +179,12 @@ namespace DaggerfallWorkshop.Game
         }
         #endregion
 
+        #region Abstract Methods
+
+        protected abstract float GetStopDistance();
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
@@ -185,19 +193,19 @@ namespace DaggerfallWorkshop.Game
         /// <param name="attacker">Attacker to become hostile towards</param>
         public void MakeEnemyHostileToAttacker(DaggerfallEntityBehaviour attacker)
         {
-            if (!senses)
-                senses = GetComponent<EnemySenses>();
+            if (!Senses)
+                Senses = GetComponent<EnemySenses>();
             if (!entityBehaviour)
                 entityBehaviour = GetComponent<DaggerfallEntityBehaviour>();
 
             // Assign target if don't already have target, or original target isn't seen or adjacent
-            if (attacker && senses && (senses.Target == null || !senses.TargetInSight || senses.DistanceToTarget > 2f))
+            if (attacker && Senses && (Senses.Target == null || !Senses.TargetInSight || Senses.DistanceToTarget > 2f))
             {
-                senses.Target = attacker;
-                senses.SecondaryTarget = senses.Target;
-                senses.OldLastKnownTargetPos = attacker.transform.position;
-                senses.LastKnownTargetPos = attacker.transform.position;
-                senses.PredictedTargetPos = attacker.transform.position;
+                Senses.Target = attacker;
+                Senses.SecondaryTarget = Senses.Target;
+                Senses.OldLastKnownTargetPos = attacker.transform.position;
+                Senses.LastKnownTargetPos = attacker.transform.position;
+                Senses.PredictedTargetPos = attacker.transform.position;
                 GiveUpTimer = 200;
             }
 
@@ -356,7 +364,7 @@ namespace DaggerfallWorkshop.Game
         /// </summary>
         void HandleNoAction()
         {
-            if (senses.Target == null || GiveUpTimer <= 0 || senses.PredictedTargetPos == EnemySenses.ResetPlayerPos)
+            if (Senses.Target == null || GiveUpTimer <= 0 || Senses.PredictedTargetPos == EnemySenses.ResetPlayerPos)
             {
                 SetChangeStateTimer();
                 searchMult = 0;
@@ -373,10 +381,10 @@ namespace DaggerfallWorkshop.Game
             if (Bashing)
             {
                 int speed = entity.Stats.LiveSpeed;
-                if (GameManager.ClassicUpdate && DFRandom.rand() % speed >= (speed >> 3) + 6 && attack.MeleeTimer == 0)
+                if (GameManager.ClassicUpdate && DFRandom.rand() % speed >= (speed >> 3) + 6 && Attack.MeleeTimer == 0)
                 {
                     mobile.ChangeEnemyState(MobileStates.PrimaryAttack);
-                    attack.ResetMeleeTimer();
+                    Attack.ResetMeleeTimer();
                 }
 
                 CanAct = false;
@@ -416,11 +424,11 @@ namespace DaggerfallWorkshop.Game
 
             // As long as the target is detected,
             // giveUpTimer is reset to full
-            if (senses.DetectedTarget)
+            if (Senses.DetectedTarget)
                 GiveUpTimer = 200;
 
             // GiveUpTimer value is from classic, so decrease at the speed of classic's update loop
-            if (GameManager.ClassicUpdate && !senses.DetectedTarget && GiveUpTimer > 0)
+            if (GameManager.ClassicUpdate && !Senses.DetectedTarget && GiveUpTimer > 0)
                 GiveUpTimer--;
         }
 
@@ -439,14 +447,7 @@ namespace DaggerfallWorkshop.Game
             if (isPlayingOneShot && DaggerfallUnity.Settings.EnhancedCombatAI)
                 moveSpeed /= attackSpeedDivisor;
 
-            // Classic AI moves only as close as melee range. It uses a different range for the player and for other AI.
-            if (!DaggerfallUnity.Settings.EnhancedCombatAI)
-            {
-                if (senses.Target == GameManager.Instance.PlayerEntityBehaviour)
-                    stopDistance = attack.MeleeDistance;
-                else
-                    stopDistance = attack.ClassicMeleeDistanceVsAI;
-            }
+            stopDistance = GetStopDistance();
 
             // Get location to move towards.
             GetDestination();
@@ -456,8 +457,8 @@ namespace DaggerfallWorkshop.Game
 
             float distance;
             // If enemy sees the target, use the distance value from EnemySenses, as this is also used for the melee attack decision and we need to be consistent with that.
-            if (avoidObstaclesTimer <= 0 && senses.TargetInSight)
-                distance = senses.DistanceToTarget;
+            if (avoidObstaclesTimer <= 0 && Senses.TargetInSight)
+                distance = Senses.DistanceToTarget;
             else
                 distance = (destination - transform.position).magnitude;
 
@@ -490,7 +491,7 @@ namespace DaggerfallWorkshop.Game
                 if (changeStateTimer <= 0 || pursuing)
                     AttemptMove(direction, moveSpeed);
                 // Otherwise, look at target until timer finishes
-                else if (!senses.TargetIsWithinYawAngle(22.5f, destination))
+                else if (!Senses.TargetIsWithinYawAngle(22.5f, destination))
                     TurnToTarget(direction);
             }
             else if (DaggerfallUnity.Settings.EnhancedCombatAI && strafeTimer <= 0)
@@ -503,7 +504,7 @@ namespace DaggerfallWorkshop.Game
             }
             // Back away from combat target if right next to it, or if decided to retreat and enemy is too close.
             // Classic AI never backs away.
-            else if (DaggerfallUnity.Settings.EnhancedCombatAI && senses.TargetInSight && (distance < stopDistance * .8f ||
+            else if (DaggerfallUnity.Settings.EnhancedCombatAI && Senses.TargetInSight && (distance < stopDistance * .8f ||
                 !moveInForAttack && distance < stopDistance * retreatDistanceMultiplier && (changeStateTimer <= 0 || retreating)))
             {
                 // If state change timer is done, or we are already executing a retreat, we can move immediately
@@ -511,7 +512,7 @@ namespace DaggerfallWorkshop.Game
                     AttemptMove(direction, moveSpeed / 2, true);
             }
             // Not moving, just look at target
-            else if (!senses.TargetIsWithinYawAngle(22.5f, destination))
+            else if (!Senses.TargetIsWithinYawAngle(22.5f, destination))
             {
                 TurnToTarget(direction);
             }
@@ -529,16 +530,16 @@ namespace DaggerfallWorkshop.Game
         /// </summary>
         void GetDestination()
         {
-            CharacterController targetController = senses.Target.GetComponent<CharacterController>();
+            CharacterController targetController = Senses.Target.GetComponent<CharacterController>();
             // If detouring around an obstacle or fall, use the detour position
             if (avoidObstaclesTimer > 0)
             {
                 destination = detourDestination;
             }
             // Otherwise, try to get to the combat target if there is a clear path to it
-            else if (ClearPathToPosition(senses.PredictedTargetPos, (destination - transform.position).magnitude) || (senses.TargetInSight && (hasBowAttack || entity.CurrentMagicka > 0)))
+            else if (ClearPathToPosition(Senses.PredictedTargetPos, (destination - transform.position).magnitude) || (Senses.TargetInSight && (hasBowAttack || entity.CurrentMagicka > 0)))
             {
-                destination = senses.PredictedTargetPos;
+                destination = Senses.PredictedTargetPos;
                 // Flying enemies and slaughterfish aim for target face
                 if (flies || IsLevitating || (swims && mobile.Enemy.ID == (int)MonsterCareers.Slaughterfish))
                     destination.y += targetController.height * 0.5f;
@@ -548,14 +549,14 @@ namespace DaggerfallWorkshop.Game
             // Otherwise, search for target based on its last known position and direction
             else
             {
-                Vector3 searchPosition = senses.LastKnownTargetPos + (senses.LastPositionDiff.normalized * searchMult);
+                Vector3 searchPosition = Senses.LastKnownTargetPos + (Senses.LastPositionDiff.normalized * searchMult);
                 if (searchMult <= 10 && (searchPosition - transform.position).magnitude <= stopDistance)
                     searchMult++;
 
                 destination = searchPosition;
             }
 
-            if (avoidObstaclesTimer <= 0 && !flies && !IsLevitating && !swims && senses.Target)
+            if (avoidObstaclesTimer <= 0 && !flies && !IsLevitating && !swims && Senses.Target)
             {
                 // Ground enemies target at their own height
                 // Otherwise, short enemies' vector can aim up towards the target, which could interfere with distance-to-target calculations.
@@ -569,10 +570,10 @@ namespace DaggerfallWorkshop.Game
         /// </summary>
         bool DoRangedAttack(Vector3 direction, float moveSpeed, float distance, bool isPlayingOneShot)
         {
-            bool inRange = senses.DistanceToTarget > EnemyAttack.minRangedDistance && senses.DistanceToTarget < EnemyAttack.maxRangedDistance;
-            if (inRange && senses.TargetInSight && senses.DetectedTarget && (CanShootBow() || CanCastRangedSpellHandler()))
+            bool inRange = Senses.DistanceToTarget > EnemyAttack.minRangedDistance && Senses.DistanceToTarget < EnemyAttack.maxRangedDistance;
+            if (inRange && Senses.TargetInSight && Senses.DetectedTarget && (CanShootBow() || CanCastRangedSpellHandler()))
             {
-                if (DaggerfallUnity.Settings.EnhancedCombatAI && senses.TargetIsWithinYawAngle(22.5f, destination) && strafeTimer <= 0)
+                if (DaggerfallUnity.Settings.EnhancedCombatAI && Senses.TargetIsWithinYawAngle(22.5f, destination) && strafeTimer <= 0)
                 {
                     StrafeDecision();
                 }
@@ -582,7 +583,7 @@ namespace DaggerfallWorkshop.Game
                     AttemptMove(direction, moveSpeed / 4, false, true, distance);
                 }
 
-                if (GameManager.ClassicUpdate && senses.TargetIsWithinYawAngle(22.5f, destination))
+                if (GameManager.ClassicUpdate && Senses.TargetIsWithinYawAngle(22.5f, destination))
                 {
                     if (!isPlayingOneShot)
                     {
@@ -618,14 +619,14 @@ namespace DaggerfallWorkshop.Game
         /// </summary>
         bool DoTouchSpell()
         {
-            if (senses.TargetInSight && senses.DetectedTarget && attack.MeleeTimer == 0
-                && senses.DistanceToTarget <= attack.MeleeDistance + senses.TargetRateOfApproach
+            if (Senses.TargetInSight && Senses.DetectedTarget && Attack.MeleeTimer == 0
+                && Senses.DistanceToTarget <= Attack.MeleeDistance + Senses.TargetRateOfApproach
                 && CanCastTouchSpellHandler() && entityEffectManager.SetReadySpell(SelectedSpell))
             {
                 if (mobile.EnemyState != MobileStates.Spell)
                     mobile.ChangeEnemyState(MobileStates.Spell);
 
-                attack.ResetMeleeTimer();
+                Attack.ResetMeleeTimer();
                 return true;
             }
 
@@ -679,7 +680,7 @@ namespace DaggerfallWorkshop.Game
             if (Physics.SphereCast(transform.position, controller.radius / 2, sphereCastDir, out hit, dist, ignoreMaskForShooting))
             {
                 DaggerfallEntityBehaviour hitTarget = hit.transform.GetComponent<DaggerfallEntityBehaviour>();
-                if (hitTarget == senses.Target)
+                if (hitTarget == Senses.Target)
                 {
                     return true;
                 }
@@ -698,7 +699,7 @@ namespace DaggerfallWorkshop.Game
         public bool HasClearPathToShootProjectile(float speed, float originDistance, float radius)
         {
             // Check that there is a clear path to shoot projectile
-            Vector3 sphereCastDir = senses.PredictNextTargetPos(speed);
+            Vector3 sphereCastDir = Senses.PredictNextTargetPos(speed);
             if (sphereCastDir == EnemySenses.ResetPlayerPos)
                 return false;
 
@@ -729,7 +730,7 @@ namespace DaggerfallWorkshop.Game
                 DaggerfallEntityBehaviour hitTarget = hit.transform.GetComponent<DaggerfallEntityBehaviour>();
 
                 // Clear path to target
-                if (hitTarget == senses.Target)
+                if (hitTarget == Senses.Target)
                     return true;
 
                 // Something in the way
@@ -849,9 +850,9 @@ namespace DaggerfallWorkshop.Game
         /// </summary>
         public bool EffectsAlreadyOnTarget(EntityEffectBundle spell)
         {
-            if (senses.Target)
+            if (Senses.Target)
             {
-                EntityEffectManager targetEffectManager = senses.Target.GetComponent<EntityEffectManager>();
+                EntityEffectManager targetEffectManager = Senses.Target.GetComponent<EntityEffectManager>();
                 LiveEffectBundle[] bundles = targetEffectManager.EffectBundles;
 
                 for (int i = 0; i < spell.Settings.Effects.Length; i++)
@@ -893,12 +894,12 @@ namespace DaggerfallWorkshop.Game
                 pursuing = false;
             }
 
-            if (!senses.TargetIsWithinYawAngle(5.625f, destination))
+            if (!Senses.TargetIsWithinYawAngle(5.625f, destination))
             {
                 TurnToTarget(direction);
                 // Classic always turns in place. Enhanced only does so if enemy is not in sight,
                 // for more natural-looking movement while pursuing.
-                if (!DaggerfallUnity.Settings.EnhancedCombatAI || !senses.TargetInSight)
+                if (!DaggerfallUnity.Settings.EnhancedCombatAI || !Senses.TargetInSight)
                     return;
             }
 
@@ -932,18 +933,18 @@ namespace DaggerfallWorkshop.Game
             // If using enhanced combat, avoid moving directly below targets
             if (!backAway && DaggerfallUnity.Settings.EnhancedCombatAI && avoidObstaclesTimer <= 0)
             {
-                bool withinPitch = senses.TargetIsWithinPitchAngle(45.0f);
+                bool withinPitch = Senses.TargetIsWithinPitchAngle(45.0f);
                 if (!pausePursuit && !withinPitch)
                 {
                     if (flies || IsLevitating || swims)
                     {
-                        if (!senses.TargetIsAbove())
+                        if (!Senses.TargetIsAbove())
                             motion = -transform.up * moveSpeed / 2;
                         else
                             motion = transform.up * moveSpeed;
                     }
                     // Causes a random delay after being out of pitch range
-                    else if (senses.TargetIsAbove() && changeStateTimer <= 0)
+                    else if (Senses.TargetIsAbove() && changeStateTimer <= 0)
                     {
                         SetChangeStateTimer();
                         pausePursuit = true;
@@ -957,7 +958,7 @@ namespace DaggerfallWorkshop.Game
 
                 if (pausePursuit)
                 {
-                    if (senses.TargetIsAbove() && !senses.TargetIsWithinPitchAngle(55.0f) && (changeStateTimer <= 0 || backingUp))
+                    if (Senses.TargetIsAbove() && !Senses.TargetIsWithinPitchAngle(55.0f) && (changeStateTimer <= 0 || backingUp))
                     {
                         // Back away from target
                         motion = -transform.forward * moveSpeed * 0.75f;
@@ -1147,7 +1148,7 @@ namespace DaggerfallWorkshop.Game
 
             RaycastHit hit;
             // Climbable/not climbable step for the player seems to be at around a height of 0.65f. The player is 1.8f tall.
-            // Using the same ratio to height as these values, set the capsule for the enemy. 
+            // Using the same ratio to height as these values, set the capsule for the enemy.
             Vector3 p1 = transform.position + (Vector3.up * -originalHeight * 0.1388F);
             Vector3 p2 = p1 + (Vector3.up * Mathf.Min(originalHeight, doorCrouchingHeight) / 2);
 
@@ -1161,17 +1162,17 @@ namespace DaggerfallWorkshop.Game
 
                 if (entityBehaviour2)
                 {
-                    if (entityBehaviour2 == senses.Target)
+                    if (entityBehaviour2 == Senses.Target)
                         ObstacleDetected = false;
                 }
                 else if (door)
                 {
                     ObstacleDetected = false;
                     foundDoor = true;
-                    if (senses.TargetIsWithinYawAngle(22.5f, door.transform.position))
+                    if (Senses.TargetIsWithinYawAngle(22.5f, door.transform.position))
                     {
-                        senses.LastKnownDoor = door;
-                        senses.DistanceToDoor = Vector3.Distance(transform.position, door.transform.position);
+                        Senses.LastKnownDoor = door;
+                        Senses.DistanceToDoor = Vector3.Distance(transform.position, door.transform.position);
                     }
                 }
                 else if (loot)
@@ -1232,31 +1233,31 @@ namespace DaggerfallWorkshop.Game
             }
 
             // No retreat from unseen opponent
-            if (!senses.TargetInSight)
+            if (!Senses.TargetInSight)
             {
                 moveInForAttack = true;
                 return;
             }
 
             // No retreat if enemy is paralyzed
-            if (senses.Target != null)
+            if (Senses.Target != null)
             {
-                EntityEffectManager targetEffectManager = senses.Target.GetComponent<EntityEffectManager>();
-                if (targetEffectManager.FindIncumbentEffect<MagicAndEffects.MagicEffects.Paralyze>() != null)
+                EntityEffectManager targetEffectManager = Senses.Target.GetComponent<EntityEffectManager>();
+                if (targetEffectManager.FindIncumbentEffect<DaggerfallWorkshop.Game.MagicAndEffects.MagicEffects.Paralyze>() != null)
                 {
                     moveInForAttack = true;
                     return;
                 }
 
                 // No retreat if enemy's back is turned
-                if (senses.TargetHasBackTurned())
+                if (Senses.TargetHasBackTurned())
                 {
                     moveInForAttack = true;
                     return;
                 }
 
                 // No retreat if enemy is player with bow or weapon not out
-                if (senses.Target == GameManager.Instance.PlayerEntityBehaviour
+                if (Senses.Target == GameManager.Instance.PlayerEntityBehaviour
                     && GameManager.Instance.WeaponManager.ScreenWeapon
                     && (GameManager.Instance.WeaponManager.ScreenWeapon.WeaponType == WeaponTypes.Bow
                     || !GameManager.Instance.WeaponManager.ScreenWeapon.ShowWeapon))
@@ -1274,7 +1275,7 @@ namespace DaggerfallWorkshop.Game
 
             // Level difference affects likelihood of backing away.
             moveInForAttackTimer = Random.Range(1, 3);
-            int levelMod = (entity.Level - senses.Target.Entity.Level) / 2;
+            int levelMod = (entity.Level - Senses.Target.Entity.Level) / 2;
             if (levelMod > 4)
                 levelMod = 4;
             if (levelMod < -4)
@@ -1427,17 +1428,17 @@ namespace DaggerfallWorkshop.Game
             // Try to open doors blocking way
             if (mobile.Enemy.CanOpenDoors)
             {
-                if (senses.LastKnownDoor != null
-                    && senses.DistanceToDoor < OpenDoorDistance && !senses.LastKnownDoor.IsOpen
-                    && !senses.LastKnownDoor.IsLocked)
+                if (Senses.LastKnownDoor != null
+                    && Senses.DistanceToDoor < OpenDoorDistance && !Senses.LastKnownDoor.IsOpen
+                    && !Senses.LastKnownDoor.IsLocked)
                 {
-                    senses.LastKnownDoor.ToggleDoor();
+                    Senses.LastKnownDoor.ToggleDoor();
                     return;
                 }
 
                 // If door didn't open, and we are trying to get to the target, bash
-                Bashing = DaggerfallUnity.Settings.EnhancedCombatAI && !senses.TargetInSight && moveInForAttack
-                    && senses.LastKnownDoor != null && senses.DistanceToDoor <= attack.MeleeDistance && senses.LastKnownDoor.IsLocked;
+                Bashing = DaggerfallUnity.Settings.EnhancedCombatAI && !Senses.TargetInSight && moveInForAttack
+                    && Senses.LastKnownDoor != null && Senses.DistanceToDoor <= Attack.MeleeDistance && Senses.LastKnownDoor.IsLocked;
             }
         }
 

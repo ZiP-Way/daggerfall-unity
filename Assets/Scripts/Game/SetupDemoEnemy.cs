@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.Entity;
+using Game.Characters;
 
 namespace DaggerfallWorkshop.Game
 {
@@ -11,7 +12,7 @@ namespace DaggerfallWorkshop.Game
     /// Currently using this component to setup enemy entity.
     /// TODO: Revise enemy instantiation and entity assignment.
     /// </summary>
-    [RequireComponent(typeof(EnemyMotor))]
+    [RequireComponent(typeof(CharacterMotor))]
     public class SetupDemoEnemy : MonoBehaviour
     {
         public MobileTypes EnemyType = MobileTypes.SkeletalWarrior;
