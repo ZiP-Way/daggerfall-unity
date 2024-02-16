@@ -172,7 +172,7 @@ GameObject:
   m_Component:
   - component: {fileID: 481572}
   - component: {fileID: 11410784}
-  - component: {fileID: 11495432}
+  - component: {fileID: 1929429110556135655}
   - component: {fileID: 11499798}
   - component: {fileID: 11424130}
   - component: {fileID: 11470552}
@@ -226,7 +226,7 @@ MonoBehaviour:
   AlliedToPlayer: 0
   ClassicSpawnDistanceType: 0
   LightAura: {fileID: 1563319636301202, guid: 1004bbfa7b5984f40a7b080e442a8eea, type: 3}
---- !u!114 &11495432
+--- !u!114 &1929429110556135655
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -235,7 +235,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 140354}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca3cd5ee8201896459a5e203ff6e4968, type: 3}
+  m_Script: {fileID: 11500000, guid: b192a25fe452402faee906a073b6dc4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &11499798
