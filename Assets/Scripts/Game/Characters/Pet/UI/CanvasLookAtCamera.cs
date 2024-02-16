@@ -20,8 +20,11 @@ namespace Game.Characters.Pet.UI
             _canvas.worldCamera = _camera;
         }
 
-        private void LateUpdate() =>
+        private void LateUpdate()
+        {
             transform.LookAt(_camera.transform);
+            transform.Rotate(0, 180, 0);
+        }
 
 #if UNITY_EDITOR
         private void OnValidate()
