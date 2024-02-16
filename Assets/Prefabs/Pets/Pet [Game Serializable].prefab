@@ -181,11 +181,11 @@ GameObject:
   - component: {fileID: 8249844}
   - component: {fileID: 11492232}
   - component: {fileID: 11439840}
-  - component: {fileID: 11452974}
   - component: {fileID: 11435454}
   - component: {fileID: 11449422}
   - component: {fileID: 114919659270182526}
   - component: {fileID: 114564829754804976}
+  - component: {fileID: 8039440849394691086}
   m_Layer: 0
   m_Name: Pet [Game Serializable]
   m_TagString: Untagged
@@ -260,7 +260,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 140354}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 148778fc11ccec74aa9f538dab0d07d9, type: 3}
   m_Name: 
@@ -447,19 +447,6 @@ MonoBehaviour:
   BarkSound: 0
   AttackSound: 0
   RaceForSounds: 0
---- !u!114 &11452974
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 140354}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 727166852387f3c4ca2404b91b6598d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OpenDoorDistance: 2
 --- !u!114 &11435454
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -519,3 +506,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc4605c0e3094014681dad701a91ecdf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8039440849394691086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 140354}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7039bc70707e42ebba1f9d49b67bf25d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OpenDoorDistance: 2
+  _stopDistance: 5
