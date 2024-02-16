@@ -5,7 +5,7 @@
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
 // Contributors:    Numidium
-// 
+//
 // Notes:
 //
 
@@ -80,7 +80,7 @@ namespace DaggerfallWorkshop.Game.MagicAndEffects
 
         RacialOverrideEffect racialOverrideEffect;
         PassiveSpecialsEffect passiveSpecialsEffect;
-        
+
         Dictionary<ulong, DaggerfallUnityItem> activeMagicItemsInRound = new Dictionary<ulong, DaggerfallUnityItem>();
         Dictionary<ulong, DaggerfallUnityItem> itemsPendingReroll = new Dictionary<ulong, DaggerfallUnityItem>();
 
@@ -1270,7 +1270,7 @@ namespace DaggerfallWorkshop.Game.MagicAndEffects
         }
 
         int GetEffectCastingCost(IEntityEffect effect, TargetTypes targetType, DaggerfallEntity casterEntity)
-        {            
+        {
             (int _, int spellPointCost) = FormulaHelper.CalculateEffectCosts(effect, effect.Settings, casterEntity);
             spellPointCost = FormulaHelper.ApplyTargetCostMultiplier(spellPointCost, targetType);
 
@@ -2090,7 +2090,7 @@ namespace DaggerfallWorkshop.Game.MagicAndEffects
             readySpellDoesNotCostSpellPoints = false;
         }
 
-        #endregion  
+        #endregion
 
         #region Event Handling
 
@@ -2366,14 +2366,14 @@ namespace DaggerfallWorkshop.Game.MagicAndEffects
             }
             else if ((casterEntityType == EntityTypes.EnemyMonster || casterEntityType == EntityTypes.EnemyClass) && loadID != 0)
             {
-                SerializableEnemy serializableEnemy = SaveLoadManager.StateManager.GetEnemy(loadID);
-                if (!serializableEnemy)
+                SerializableCharacter serializableCharacter = SaveLoadManager.StateManager.GetEnemy(loadID);
+                if (!serializableCharacter)
                 {
                     Debug.LogWarning(string.Format("EntityEffect.RestoreEffectSaveData() could not find SerializableEnemy for LoadID {0} in StateManager.", loadID));
                     return null;
                 }
 
-                caster = serializableEnemy.GetComponent<DaggerfallEntityBehaviour>();
+                caster = serializableCharacter.GetComponent<DaggerfallEntityBehaviour>();
                 if (!caster)
                     throw new Exception(string.Format("EntityEffect.RestoreEffectSaveData() could not find DaggerfallEntityBehaviour for LoadID {0} in StateManager.", loadID));
             }
