@@ -5,7 +5,7 @@
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
 // Contributors:    Lypyl (lypyl@dfworkshop.net)
-// 
+//
 // Notes:
 //
 
@@ -319,7 +319,7 @@ namespace DaggerfallWorkshop.Utility
             Billboard dfBillboard = go.AddComponent<DaggerfallBillboard>();
             dfBillboard.SetMaterial(archive, record);
 
-            if (PlayerActivate.HasCustomActivation(flatName)) 
+            if (PlayerActivate.HasCustomActivation(flatName))
             {
                 // Add box collider to flats with actions for raycasting - only flats that can be activated directly need this, so this can possibly be restricted in future
                 // Skip this for flats that already have a collider assigned from elsewhere (e.g. NPC flats)
@@ -1017,7 +1017,7 @@ namespace DaggerfallWorkshop.Utility
                 // Female has flat2
                 flatData = FactionFile.GetFlatData(person.FactionData.flat2);
             }
-                        
+
             Vector3 dungeonBlockPosition = new Vector3(marker.dungeonX * RDBLayout.RDBSide, 0, marker.dungeonZ * RDBLayout.RDBSide);
             Vector3 targetPosition = dungeonBlockPosition + marker.flatPosition;
             Billboard dfBillboard;
@@ -1042,8 +1042,8 @@ namespace DaggerfallWorkshop.Utility
             else
             {
                 dfBillboard = go.GetComponent<Billboard>();
-            }            
-            
+            }
+
             if (dfBillboard != null)
             {
                 // Add people data to billboard
@@ -1334,6 +1334,50 @@ namespace DaggerfallWorkshop.Utility
 
         #endregion
 
+        #region Pet Helpers
+
+        /// <summary>
+        /// Create an pet in the world and perform common setup tasks.
+        /// </summary>
+        public static GameObject CreatePet(string name, MobileTypes mobileType, Vector3 localPosition, MobileGender mobileGender = MobileGender.Unspecified, Transform parent = null, MobileReactions mobileReaction = MobileReactions.Hostile)
+        {
+            // Create target GameObject
+            string displayName = string.Format("Pet {0} [{1}]", name, mobileType.ToString());
+            GameObject go = InstantiatePrefab(DaggerfallUnity.Instance.Option_PetPrefab.gameObject, displayName, parent, Vector3.zero);
+            SetupDemoEnemy setupEnemy = go.GetComponent<SetupDemoEnemy>();
+
+            // Set position
+            go.transform.localPosition = localPosition;
+
+            // Assign humanoid gender randomly if unspecfied
+            // This does not affect monsters like rats, bats, etc
+            MobileGender gender;
+            if (mobileGender == MobileGender.Unspecified)
+            {
+                if (UnityEngine.Random.Range(0f, 1f) < 0.5f)
+                    gender = MobileGender.Male;
+                else
+                    gender = MobileGender.Female;
+            }
+            else
+            {
+                gender = mobileGender;
+            }
+
+            // Configure enemy
+            setupEnemy.ApplyEnemySettings(mobileType, mobileReaction, gender);
+
+            // Align non-flying units with ground
+            MobileUnit mobileUnit = setupEnemy.GetMobileBillboardChild();
+            if (mobileUnit.Enemy.Behaviour != MobileBehaviour.Flying)
+                AlignControllerToGround(go.GetComponent<CharacterController>());
+
+            GameManager.Instance?.RaiseOnEnemySpawnEvent(go);
+
+            return go;
+        }
+
+        #endregion
         /// <summary>
         /// Create a billboard batch.
         /// </summary>
@@ -1420,7 +1464,7 @@ namespace DaggerfallWorkshop.Utility
             DFLocation location;
             if (!FindMultiNameLocation(multiName, out location))
                 return null;
-            
+
             GameObject daggerfallDungeonObject;
             daggerfallDungeon = CreateDaggerfallDungeonGameObject(location, parent, out daggerfallDungeonObject);
             daggerfallDungeon.SetDungeon(location, importEnemies);
