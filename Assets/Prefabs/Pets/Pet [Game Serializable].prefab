@@ -519,4 +519,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   OpenDoorDistance: 2
-  _stopDistance: 5
+  _stopDistance: 3
