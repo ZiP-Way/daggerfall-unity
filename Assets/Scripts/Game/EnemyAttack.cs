@@ -5,7 +5,7 @@
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
 // Contributors:    Allofich
-// 
+//
 // Notes:
 //
 
@@ -44,7 +44,7 @@ namespace DaggerfallWorkshop.Game
             motor = GetComponent<EnemyMotor>();
             senses = GetComponent<EnemySenses>();
             sounds = GetComponent<EnemySounds>();
-            mobile = GetComponent<DaggerfallEnemy>().MobileUnit;
+            mobile = GetComponent<DaggerfallCharacter>().MobileUnit;
             entityBehaviour = GetComponent<DaggerfallEntityBehaviour>();
         }
 

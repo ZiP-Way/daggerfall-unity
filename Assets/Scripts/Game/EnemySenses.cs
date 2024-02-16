@@ -5,7 +5,7 @@
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
 // Contributors:    Allofich
-// 
+//
 // Notes:
 //
 
@@ -214,7 +214,7 @@ namespace DaggerfallWorkshop.Game
             CanHearTargetHandler = CanHearTarget;
             CanDetectOtherwiseHandler = delegate (DaggerfallEntityBehaviour target) { return false; };
 
-            mobile = GetComponent<DaggerfallEnemy>().MobileUnit;
+            mobile = GetComponent<DaggerfallCharacter>().MobileUnit;
             entityBehaviour = GetComponent<DaggerfallEntityBehaviour>();
             enemyEntity = entityBehaviour.Entity as EnemyEntity;
             motor = GetComponent<EnemyMotor>();
