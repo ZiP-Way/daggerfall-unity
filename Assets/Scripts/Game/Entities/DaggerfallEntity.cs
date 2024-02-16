@@ -4,8 +4,8 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
-// Contributors:    
-// 
+// Contributors:
+//
 // Notes:
 //
 
@@ -331,6 +331,7 @@ namespace DaggerfallWorkshop.Game.Entity
         public virtual int SetHealth(int amount, bool restoreMode = false)
         {
             currentHealth = (restoreMode) ? amount : Mathf.Clamp(amount, 0, MaxHealth);
+            RaiseOnHealthChangedEvent();
             if (currentHealth <= 0)
                 RaiseOnDeathEvent();
 
@@ -880,6 +881,14 @@ namespace DaggerfallWorkshop.Game.Entity
                 OnDeath(this);
         }
 
+        public delegate void OnHealthChangedHandler();
+        public event OnHealthChangedHandler OnHealthChanged;
+        protected void RaiseOnHealthChangedEvent()
+        {
+            if (OnHealthChanged != null && !quiesce)
+                OnHealthChanged();
+        }
+
         public delegate void OnExhaustedHandler(DaggerfallEntity entity);
         public event OnExhaustedHandler OnExhausted;
         void RaiseOnExhaustedEvent()
@@ -950,7 +959,7 @@ namespace DaggerfallWorkshop.Game.Entity
         }
 
         /// <summary>
-        /// Sets the career template for a custom (ie: mod-provided) enemy type. 
+        /// Sets the career template for a custom (ie: mod-provided) enemy type.
         /// </summary>
         /// <param name="enemyId">ID, as defined in EnemyBasics.Enemies</param>
         /// <param name="career">The custom DFCareer template to register</param>
