@@ -776,6 +776,21 @@ namespace DaggerfallWorkshop.Utility
         }
 
         /// <summary>
+        /// Creates a loot container for items dropped by the player.
+        /// </summary>
+        /// <param name="player">Player object, must have PlayerEnterExit and PlayerMotor attached.</param>
+        /// <param name="loadID">Unique LoadID for save system.</param>
+        /// <param name="at">Spawning position.</param>
+        /// <returns>DaggerfallLoot.</returns>
+        public static DaggerfallLoot CreateDroppedLootContainer(GameObject player, ulong loadID, Vector3 at, int iconArchive = DaggerfallLootDataTables.randomTreasureArchive, int iconRecord = -1)
+        {
+            DaggerfallLoot loot = CreateDroppedLootContainer(player, loadID, iconArchive, iconRecord);
+            loot.transform.position = at;
+
+            return loot;
+        }
+
+        /// <summary>
         /// Creates a loot container for enemies slain by the player.
         /// </summary>
         /// <param name="player">Player object, must have PlayerEnterExit attached.</param>
