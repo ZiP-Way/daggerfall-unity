@@ -1,5 +1,4 @@
-﻿using System;
-using DaggerfallWorkshop.Game.Entity;
+﻿using DaggerfallWorkshop.Game.Entity;
 using UnityEngine;
 using UnityEngine.UI;
 
