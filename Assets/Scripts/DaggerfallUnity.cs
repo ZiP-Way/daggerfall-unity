@@ -4,8 +4,8 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
-// Contributors:    
-// 
+// Contributors:
+//
 // Notes:
 //
 
@@ -99,6 +99,8 @@ namespace DaggerfallWorkshop
         public MobilePersonMotor Option_MobileNPCPrefab = null;
         public bool Option_ImportEnemyPrefabs = true;
         public DaggerfallEnemy Option_EnemyPrefab = null;
+        public bool Option_ImportPetPrefabs = true;
+        public DaggerfallPet Option_PetPrefab = null;
         public bool Option_ImportRandomTreasure = true;
         public DaggerfallLoot Option_LootContainerPrefab = null;
         public GameObject Option_DungeonWaterPrefab = null;
@@ -383,7 +385,7 @@ namespace DaggerfallWorkshop
 
             // Finally, look for arena2 folder in StreamingAssets/GameFiles
             if (Application.isPlaying && !found)
-            { 
+            {
                 path = TestArena2Exists(Path.Combine(Application.streamingAssetsPath, "GameFiles"));
                 if (!string.IsNullOrEmpty(path))
                     found = true;

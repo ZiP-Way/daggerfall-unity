@@ -4,8 +4,8 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
-// Contributors:    
-// 
+// Contributors:
+//
 // Notes:
 //
 
@@ -221,6 +221,19 @@ namespace DaggerfallWorkshop
                     GUILayoutHelper.Indent(() =>
                     {
                         propEnemyPrefab.objectReferenceValue = EditorGUILayout.ObjectField(new GUIContent("Enemies", "Prefab for enemies."), propEnemyPrefab.objectReferenceValue, typeof(DaggerfallEnemy), false);
+                    });
+                });
+
+                // Pets
+                var propImportPetPrefabs = Prop("Option_ImportPetPrefabs");
+                var propPetPrefab = Prop("Option_PetPrefab");
+                EditorGUILayout.Space();
+                propImportPetPrefabs.boolValue = EditorGUILayout.Toggle(new GUIContent("Import Pet Prefabs", "Import pet prefabs into scene."), propImportPetPrefabs.boolValue);
+                GUILayoutHelper.EnableGroup(propImportPetPrefabs.boolValue, () =>
+                {
+                    GUILayoutHelper.Indent(() =>
+                    {
+                        propPetPrefab.objectReferenceValue = EditorGUILayout.ObjectField(new GUIContent("Pets", "Prefab for pets."), propPetPrefab.objectReferenceValue, typeof(DaggerfallPet), false);
                     });
                 });
 

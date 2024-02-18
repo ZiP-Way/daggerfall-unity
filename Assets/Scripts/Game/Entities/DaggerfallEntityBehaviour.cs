@@ -4,8 +4,8 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
-// Contributors:    
-// 
+// Contributors:
+//
 // Notes:
 //
 
@@ -300,6 +300,7 @@ namespace DaggerfallWorkshop.Game.Entity
         {
             RaiseOnSetEntityHandler(entity, value);
             entity = value;
+            RaiseOnEntityAssignedHandler();
         }
 
         #endregion
@@ -312,6 +313,14 @@ namespace DaggerfallWorkshop.Game.Entity
         {
             if (OnSetEntity != null)
                 OnSetEntity(oldEntity, newEntity);
+        }
+
+        public delegate void OnEntityAssignedHandler();
+        public event OnEntityAssignedHandler OnEntityAssigned;
+        void RaiseOnEntityAssignedHandler()
+        {
+            if (OnEntityAssigned != null)
+                OnEntityAssigned();
         }
 
         #endregion

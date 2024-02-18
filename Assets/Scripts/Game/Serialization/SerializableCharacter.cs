@@ -4,8 +4,8 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
-// Contributors:    
-// 
+// Contributors:
+//
 // Notes:
 //
 
@@ -20,11 +20,11 @@ using DaggerfallWorkshop.Game.MagicAndEffects;
 
 namespace DaggerfallWorkshop.Game.Serialization
 {
-    public class SerializableEnemy : MonoBehaviour, ISerializableGameObject
+    public class SerializableCharacter : MonoBehaviour, ISerializableGameObject
     {
         #region Fields
 
-        DaggerfallEnemy enemy;
+        DaggerfallCharacter character;
 
         #endregion
 
@@ -32,9 +32,9 @@ namespace DaggerfallWorkshop.Game.Serialization
 
         void Awake()
         {
-            enemy = GetComponent<DaggerfallEnemy>();
-            if (!enemy)
-                throw new Exception("DaggerfallEnemy not found.");
+            character = GetComponent<DaggerfallCharacter>();
+            if (!character)
+                throw new Exception("DaggerfallCharacter not found.");
         }
 
         void Start()
@@ -42,7 +42,7 @@ namespace DaggerfallWorkshop.Game.Serialization
             if (LoadID != 0)
             {
                 // In RDB layouts the LoadID is generated from RDB record position
-                // This is used to map save data back to an enemy injected by layout builders
+                // This is used to map save data back to an character injected by layout builders
                 // But this can result in collisions when an RDB block is used more than once per layout
                 // This hack fix will resolve collision by incrementing LoadID
                 // This only works because RDB resources are always laid out in the same order
@@ -50,10 +50,10 @@ namespace DaggerfallWorkshop.Game.Serialization
                 // This bug can happen for serializable enemies, doors, and action objects added by layout
                 // Does not affect dynamic objects like quest enemies and loot piles
                 // Only fixing for enemies now - will look for a better solution in the future
-                if (enemy && GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon)
+                if (character && GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon)
                 {
-                    while (SaveLoadManager.StateManager.ContainsEnemy(enemy.LoadID))
-                        enemy.LoadID++;
+                    while (SaveLoadManager.StateManager.ContainsEnemy(character.LoadID))
+                        character.LoadID++;
                 }
 
                 SaveLoadManager.RegisterSerializableGameObject(this);
@@ -82,25 +82,25 @@ namespace DaggerfallWorkshop.Game.Serialization
 
         public object GetSaveData()
         {
-            if (!enemy)
+            if (!character)
                 return null;
 
             // Get entity behaviour
-            DaggerfallEntityBehaviour entityBehaviour = enemy.GetComponent<DaggerfallEntityBehaviour>();
+            DaggerfallEntityBehaviour entityBehaviour = character.GetComponent<DaggerfallEntityBehaviour>();
             if (!entityBehaviour)
                 return null;
 
             // Create save data
             EnemyEntity entity = entityBehaviour.Entity as EnemyEntity;
-            EnemyMotor motor = enemy.GetComponent<EnemyMotor>();
-            EnemySenses senses = enemy.GetComponent<EnemySenses>();
-            var mobileEnemy = enemy.GetComponentInChildren<MobileUnit>();
+            EnemyMotor motor = character.GetComponent<EnemyMotor>();
+            EnemySenses senses = character.GetComponent<EnemySenses>();
+            var mobileEnemy = character.GetComponentInChildren<MobileUnit>();
             EnemyData_v1 data = new EnemyData_v1();
             data.loadID = LoadID;
             data.gameObjectName = entityBehaviour.gameObject.name;
-            data.currentPosition = enemy.transform.position;
-            data.localPosition = enemy.transform.localPosition;
-            data.currentRotation = enemy.transform.rotation;
+            data.currentPosition = character.transform.position;
+            data.localPosition = character.transform.localPosition;
+            data.currentRotation = character.transform.rotation;
             data.worldContext = entity.WorldContext;
             data.worldCompensation = GameManager.Instance.StreamingWorld.WorldCompensation;
             data.entityType = entity.EntityType;
@@ -113,7 +113,7 @@ namespace DaggerfallWorkshop.Game.Serialization
             data.isHostile = motor.IsHostile;
             data.hasEncounteredPlayer = senses.HasEncounteredPlayer;
             data.isDead = (entity.CurrentHealth <= 0) ? true : false;
-            data.questSpawn = enemy.QuestSpawn;
+            data.questSpawn = character.QuestSpawn;
             data.mobileGender = mobileEnemy.Enemy.Gender;
             data.items = entity.Items.SerializeItems();
             data.equipTable = entity.ItemEquipTable.SerializeEquipTable();
@@ -137,23 +137,23 @@ namespace DaggerfallWorkshop.Game.Serialization
 
         public void RestoreSaveData(object dataIn)
         {
-            if (!enemy)
+            if (!character)
                 return;
 
             EnemyData_v1 data = (EnemyData_v1)dataIn;
             if (data.loadID != LoadID)
                 return;
 
-            DaggerfallEntityBehaviour entityBehaviour = enemy.GetComponent<DaggerfallEntityBehaviour>();
-            EnemySenses senses = enemy.GetComponent<EnemySenses>();
-            EnemyMotor motor = enemy.GetComponent<EnemyMotor>();
+            DaggerfallEntityBehaviour entityBehaviour = character.GetComponent<DaggerfallEntityBehaviour>();
+            EnemySenses senses = character.GetComponent<EnemySenses>();
+            EnemyMotor motor = character.GetComponent<EnemyMotor>();
             EnemyEntity entity = entityBehaviour.Entity as EnemyEntity;
-            MobileUnit mobileEnemy = enemy.GetComponentInChildren<MobileUnit>();
+            MobileUnit mobileEnemy = character.GetComponentInChildren<MobileUnit>();
 
             // Restore enemy career or class if different
             if (entity == null || entity.EntityType != data.entityType || entity.CareerIndex != data.careerIndex)
             {
-                SetupDemoEnemy setupEnemy = enemy.GetComponent<SetupDemoEnemy>();
+                SetupDemoEnemy setupEnemy = character.GetComponent<SetupDemoEnemy>();
                 setupEnemy.ApplyEnemySettings(data.entityType, data.careerIndex, data.mobileGender, data.isHostile, alliedToPlayer: data.alliedToPlayer);
                 setupEnemy.AlignToGround();
 
@@ -166,7 +166,7 @@ namespace DaggerfallWorkshop.Game.Serialization
 
             // Restore enemy data
             entityBehaviour.gameObject.name = data.gameObjectName;
-            enemy.transform.rotation = data.currentRotation;
+            character.transform.rotation = data.currentRotation;
             entity.QuestFoeSpellQueueIndex = data.questFoeSpellQueueIndex;
             entity.QuestFoeItemQueueIndex = data.questFoeItemQueueIndex;
             entity.WabbajackActive = data.wabbajackActive;
@@ -185,15 +185,15 @@ namespace DaggerfallWorkshop.Game.Serialization
             // Restore enemy position and migrate to floating y support for exteriors
             // Interiors seem to be working fine at this stage with any additional support
             // Dungeons are not involved with floating y and don't need any changes
-            WorldContext enemyContext = GetEnemyWorldContext(enemy);
+            WorldContext enemyContext = GetEnemyWorldContext(character);
             if (enemyContext == WorldContext.Exterior)
             {
-                RestoreExteriorPositionHandler(enemy, data, enemyContext);
+                RestoreExteriorPositionHandler(character, data, enemyContext);
             }
             else
             {
                 // Everything else
-                enemy.transform.position = data.currentPosition;
+                character.transform.position = data.currentPosition;
             }
 
             // Disable dead enemies
@@ -203,8 +203,8 @@ namespace DaggerfallWorkshop.Game.Serialization
             }
 
             // Restore quest resource link
-            enemy.QuestSpawn = data.questSpawn;
-            if (enemy.QuestSpawn)
+            character.QuestSpawn = data.questSpawn;
+            if (character.QuestSpawn)
             {
                 // Add QuestResourceBehaviour to GameObject
                 QuestResourceBehaviour questResourceBehaviour = entityBehaviour.gameObject.AddComponent<QuestResourceBehaviour>();
@@ -213,7 +213,7 @@ namespace DaggerfallWorkshop.Game.Serialization
                 // Destroy QuestResourceBehaviour if no actual quest properties are restored from save
                 if (questResourceBehaviour.QuestUID == 0 || questResourceBehaviour.TargetSymbol == null)
                 {
-                    enemy.QuestSpawn = false;
+                    character.QuestSpawn = false;
                     Destroy(questResourceBehaviour);
                 }
             }
@@ -235,33 +235,33 @@ namespace DaggerfallWorkshop.Game.Serialization
 
         #region Private Methods
 
-        void RestoreExteriorPositionHandler(DaggerfallEnemy enemy, EnemyData_v1 data, WorldContext enemyContext)
+        void RestoreExteriorPositionHandler(DaggerfallCharacter character, EnemyData_v1 data, WorldContext enemyContext)
         {
             // If enemy context matches serialized world context then enemy was saved after floating y change
             // Need to get relative difference between current and serialized world compensation to get actual y position
             if (enemyContext == data.worldContext)
             {
                 float diffY = GameManager.Instance.StreamingWorld.WorldCompensation.y - data.worldCompensation.y;
-                enemy.transform.position = data.currentPosition + new Vector3(0, diffY, 0);
+                character.transform.position = data.currentPosition + new Vector3(0, diffY, 0);
                 return;
             }
 
             // Otherwise we migrate a legacy exterior position by adjusting for world compensation
-            enemy.transform.position = data.currentPosition + GameManager.Instance.StreamingWorld.WorldCompensation;
+            character.transform.position = data.currentPosition + GameManager.Instance.StreamingWorld.WorldCompensation;
         }
 
-        WorldContext GetEnemyWorldContext(DaggerfallEnemy enemy)
+        WorldContext GetEnemyWorldContext(DaggerfallCharacter character)
         {
             // Must be a parented enemy
-            if (!enemy || !enemy.transform.parent)
+            if (!character || !character.transform.parent)
                 return WorldContext.Nothing;
 
             // Interior
-            if (enemy.transform.parent.GetComponentInParent<DaggerfallInterior>())
+            if (character.transform.parent.GetComponentInParent<DaggerfallInterior>())
                 return WorldContext.Interior;
 
             // Dungeon
-            if (enemy.transform.parent.GetComponentInParent<DaggerfallDungeon>())
+            if (character.transform.parent.GetComponentInParent<DaggerfallDungeon>())
                 return WorldContext.Dungeon;
 
             // Exterior (loose world object)
@@ -270,7 +270,7 @@ namespace DaggerfallWorkshop.Game.Serialization
 
         bool HasChanged()
         {
-            if (!enemy)
+            if (!character)
                 return false;
 
             // Always serialize enemy
@@ -301,10 +301,10 @@ namespace DaggerfallWorkshop.Game.Serialization
 
         ulong GetLoadID()
         {
-            if (!enemy)
+            if (!character)
                 return 0;
 
-            return enemy.LoadID;
+            return character.LoadID;
         }
 
         #endregion

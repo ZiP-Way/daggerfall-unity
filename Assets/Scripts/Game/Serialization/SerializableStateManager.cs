@@ -5,7 +5,7 @@
 // Source Code:     https://github.com/Interkarma/daggerfall-unity
 // Original Author: Gavin Clayton (interkarma@dfworkshop.net)
 // Contributors:    Lypyl (lypyldf@gmail.com), Hazelnut
-// 
+//
 // Notes:           Extracted from SaveLoadManager class (Hazelnut Jan2018)
 //
 
@@ -213,12 +213,12 @@ namespace DaggerfallWorkshop.Game.Serialization
         /// <summary>
         /// Gets enemy by LoadID if present in enemy serialization list.
         /// </summary>
-        public SerializableEnemy GetEnemy(ulong id)
+        public SerializableCharacter GetEnemy(ulong id)
         {
             if (!ContainsEnemy(id))
                 return null;
 
-            return SerializableEnemies[id] as SerializableEnemy;
+            return SerializableEnemies[id] as SerializableCharacter;
         }
 
         /// <summary>
@@ -417,8 +417,8 @@ namespace DaggerfallWorkshop.Game.Serialization
                 enemy.LoadID = enemies[i].loadID;
 
                 // Restore save data
-                SerializableEnemy serializableEnemy = go.GetComponent<SerializableEnemy>();
-                serializableEnemy.RestoreSaveData(enemies[i]);
+                SerializableCharacter serializableCharacter = go.GetComponent<SerializableCharacter>();
+                serializableCharacter.RestoreSaveData(enemies[i]);
 
                 GameManager.Instance?.RaiseOnEnemySpawnEvent(go);
             }
@@ -487,7 +487,7 @@ namespace DaggerfallWorkshop.Game.Serialization
         {
             if (sgObj is SerializableActionDoor) return StatefulGameObjectTypes.ActionDoor;
             else if (sgObj is SerializableActionObject) return StatefulGameObjectTypes.ActionObject;
-            else if (sgObj is SerializableEnemy) return StatefulGameObjectTypes.Enemy;
+            else if (sgObj is SerializableCharacter) return StatefulGameObjectTypes.Enemy;
             else if (sgObj is SerializableLootContainer) return StatefulGameObjectTypes.LootContainer;
             else
             {
