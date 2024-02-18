@@ -550,7 +550,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61a2e4117efa40ed8bd0c7ae1b7fcd2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _droppedLootOffset: {x: 0, y: 1, z: 0}
+  _droppedLootOffset: {x: 0, y: 0.5, z: 0}
   _motor: {fileID: 8039440849394691086}
   _playerHealthPercentListener: {fileID: 5550730089160691999}
 --- !u!114 &1025828200502451591
@@ -566,7 +566,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxDistance: 12
-  _senses: {fileID: 11499798}
 --- !u!1001 &4926067357856953325
 PrefabInstance:
   m_ObjectHideFlags: 0
